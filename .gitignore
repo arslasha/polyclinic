@@ -1,0 +1,32 @@
+# Agent specific files
+.agents/
+GEMINI.md
+.gemini/
+
+# Project management (Orchestration)
+# PLAN.md and project_context.md are source of truth for the project, 
+# keeping them unless explicitly asked to ignore.
+
+# Environment
+.env
+.env.local
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+db.sqlite3
+media/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# System files
+.DS_Store
+Thumbs.db
