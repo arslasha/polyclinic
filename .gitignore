@@ -2,7 +2,12 @@
 .agents/
 GEMINI.md
 .gemini/
-
+DESIGN.md
+project_context.md
+PLAN.md
+DATABASE.dbml
+AGENTS.md
+CLAUDE.md
 # Project management (Orchestration)
 # PLAN.md and project_context.md are source of truth for the project, 
 # keeping them unless explicitly asked to ignore.
