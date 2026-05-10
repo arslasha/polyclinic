@@ -61,6 +61,14 @@ class AppointmentSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id', 'created_at')
 
+    def validate_slot(self, value):
+        """
+        Check that the slot is available.
+        """
+        if not value.is_available:
+            raise serializers.ValidationError("Этот слот уже занят.")
+        return value
+
 class MedicalRecordSerializer(serializers.ModelSerializer):
     """
     Serializer for medical records.
