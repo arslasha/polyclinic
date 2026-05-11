@@ -1,55 +1,43 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from api.models import User, Doctor, Patient, Slot, UserRole
-from datetime import timedelta
+from datetime import timedelta, datetime
+import random
 
 class Command(BaseCommand):
-    help = 'Seeds the database with initial medical data'
+    help = 'Seeds the database with high-quality Russian medical data'
 
     def handle(self, *args, **kwargs):
-        self.stdout.write('Seeding data...')
+        self.stdout.write('Starting database seeding (Russian localization)...')
 
-        # 1. Create Doctors
-        doctors_data = [
-            {
-                'username': 'dr_ivanov',
-                'first_name': 'Иван',
-                'last_name': 'Иванов',
-                'middle_name': 'Иванович',
-                'specialization': 'Терапевт',
-                'office_number': '101',
-                'bio': 'Опытный терапевт, стаж 15 лет.'
-            },
-            {
-                'username': 'dr_petrova',
-                'first_name': 'Елена',
-                'last_name': 'Петрова',
-                'middle_name': 'Сергеевна',
-                'specialization': 'Кардиолог',
-                'office_number': '205',
-                'bio': 'Специалист по сердечно-сосудистым заболеваниям.'
-            },
-            {
-                'username': 'dr_sidorov',
-                'first_name': 'Алексей',
-                'last_name': 'Сидоров',
-                'middle_name': 'Николаевич',
-                'specialization': 'Невролог',
-                'office_number': '312',
-                'bio': 'Лечение заболеваний нервной системы.'
-            },
+        # 1. Doctors Data (following requirements)
+        doctors_info = [
+            ("Иванов", "Иван", "Иванович", "Терапевт", "101", "Опытный терапевт высшей категории."),
+            ("Петрова", "Елена", "Сергеевна", "Кардиолог", "205", "Специалист по сердечно-сосудистым заболеваниям."),
+            ("Сидоров", "Алексей", "Николаевич", "Невролог", "312", "Лечение заболеваний центральной нервной системы."),
+            ("Кузнецова", "Анна", "Михайловна", "Офтальмолог", "404", "Микрохирургия глаза и коррекция зрения."),
+            ("Морозов", "Дмитрий", "Павлович", "Хирург", "501", "Общая и абдоминальная хирургия."),
+            ("Васильева", "Ольга", "Викторовна", "Педиатр", "105", "Забота о здоровье детей с рождения."),
+            ("Смирнов", "Игорь", "Юрьевич", "Стоматолог", "602", "Терапевтическая и эстетическая стоматология."),
         ]
 
         doctors = []
-        for d in doctors_data:
+        for last, first, middle, spec, office, bio in doctors_info:
+            # Username and email in Latin
+            username = f"{last[0].lower()}{first[0].lower()}_{random.randint(100, 999)}"
+            if last == "Иванов": username = "i.ivanov"
+            if last == "Петрова": username = "e.petrova"
+            if last == "Сидоров": username = "a.sidorov"
+
             user, created = User.objects.get_or_create(
-                username=d['username'],
+                username=username,
                 defaults={
-                    'first_name': d['first_name'],
-                    'last_name': d['last_name'],
-                    'middle_name': d['middle_name'],
+                    'first_name': first,
+                    'last_name': last,
+                    'middle_name': middle,
                     'role': UserRole.DOCTOR,
-                    'email': f"{d['username']}@example.com"
+                    'email': f"{username}@polyclinic.ru",
+                    'phone': f"+7 (9{random.randint(10,99)}) {random.randint(100,999)}-{random.randint(10,99)}-{random.randint(10,99)}"
                 }
             )
             if created:
@@ -59,42 +47,34 @@ class Command(BaseCommand):
             doctor, _ = Doctor.objects.get_or_create(
                 user=user,
                 defaults={
-                    'specialization': d['specialization'],
-                    'office_number': d['office_number'],
-                    'bio': d['bio']
+                    'specialization': spec,
+                    'office_number': office,
+                    'bio': bio
                 }
             )
             doctors.append(doctor)
 
-        self.stdout.write(self.style.SUCCESS(f'Created/Updated {len(doctors)} doctors'))
+        self.stdout.write(self.style.SUCCESS(f'Successfully seeded {len(doctors)} doctors.'))
 
-        # 2. Create Patients
-        patients_data = [
-            {
-                'username': 'patient_john',
-                'first_name': 'John',
-                'last_name': 'Doe',
-                'insurance_number': '123-456-789 01',
-                'medical_policy': '9876543210123456'
-            },
-            {
-                'username': 'patient_mary',
-                'first_name': 'Mary',
-                'last_name': 'Smith',
-                'insurance_number': '321-654-987 02',
-                'medical_policy': '1111222233334444'
-            }
+        # 2. Patients Data
+        patients_info = [
+            ("Хисамутдинов", "Арслан", "Ильдарович", "patient_arslan", "123-456-789 00", "5432109876543210"),
+            ("Кузнецов", "Иван", "Петрович", "patient_ivan", "111-222-333 44", "1111222233334444"),
+            ("Смирнова", "Мария", "Александровна", "patient_mary", "555-666-777 88", "5555666677778888"),
         ]
 
         patients = []
-        for p in patients_data:
+        for last, first, middle, username, snils, policy in patients_info:
             user, created = User.objects.get_or_create(
-                username=p['username'],
+                username=username,
                 defaults={
-                    'first_name': p['first_name'],
-                    'last_name': p['last_name'],
+                    'first_name': first,
+                    'last_name': last,
+                    'middle_name': middle,
                     'role': UserRole.PATIENT,
-                    'email': f"{p['username']}@example.com"
+                    'email': f"{username}@mail.ru",
+                    'birth_date': datetime(random.randint(1970, 2005), random.randint(1, 12), random.randint(1, 28)).date(),
+                    'phone': f"+7 (9{random.randint(10,99)}) {random.randint(100,999)}-{random.randint(10,99)}-{random.randint(10,99)}"
                 }
             )
             if created:
@@ -104,35 +84,40 @@ class Command(BaseCommand):
             patient, _ = Patient.objects.get_or_create(
                 user=user,
                 defaults={
-                    'insurance_number': p['insurance_number'],
-                    'medical_policy': p['medical_policy'],
-                    'address': 'ул. Примерная, д. 1, кв. 1'
+                    'insurance_number': snils,
+                    'medical_policy': policy,
+                    'address': f"г. Москва, ул. Клиническая, д. {random.randint(1, 100)}, кв. {random.randint(1, 200)}"
                 }
             )
             patients.append(patient)
 
-        self.stdout.write(self.style.SUCCESS(f'Created/Updated {len(patients)} patients'))
+        self.stdout.write(self.style.SUCCESS(f'Successfully seeded {len(patients)} patients.'))
 
-        # 3. Create Slots
-        # Start from tomorrow 09:00
-        base_date = (timezone.now() + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
-        
+        # 3. Slots Generation (Next 14 days)
+        self.stdout.write('Generating slots for the next 14 days...')
+        now = timezone.now()
         slots_count = 0
+        
         for doctor in doctors:
-            for day_offset in range(3): # Next 3 days
-                day_start = base_date + timedelta(days=day_offset)
-                for slot_offset in range(8): # 8 slots per day (4 hours total)
-                    start_time = day_start + timedelta(minutes=slot_offset * 30)
-                    end_time = start_time + timedelta(minutes=30)
+            for day_offset in range(1, 15):
+                date = (now + timedelta(days=day_offset))
+                if date.weekday() >= 5: continue # Skip weekends (Sat, Sun)
+                
+                # Morning shift (08:00 - 14:00) or Evening shift (14:00 - 20:00)
+                start_hour = 8 if (doctor.id + day_offset) % 2 == 0 else 14
+                
+                for i in range(12): # 12 slots * 30 min = 6 hours
+                    slot_start = date.replace(hour=start_hour, minute=0, second=0, microsecond=0) + timedelta(minutes=i * 30)
+                    slot_end = slot_start + timedelta(minutes=30)
                     
                     _, created = Slot.objects.get_or_create(
                         doctor=doctor,
-                        start_time=start_time,
-                        end_time=end_time,
+                        start_time=slot_start,
+                        end_time=slot_end,
                         defaults={'is_available': True}
                     )
                     if created:
                         slots_count += 1
 
-        self.stdout.write(self.style.SUCCESS(f'Created {slots_count} new availability slots'))
-        self.stdout.write(self.style.SUCCESS('Seeding completed successfully!'))
+        self.stdout.write(self.style.SUCCESS(f'Total {slots_count} availability slots generated.'))
+        self.stdout.write(self.style.SUCCESS('Database seeding completed successfully!'))

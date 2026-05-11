@@ -1,5 +1,7 @@
 from django.db import transaction
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from .models import User, Doctor, Patient, Slot, Appointment, MedicalRecord
 from .serializers import (
     UserSerializer, DoctorSerializer, PatientSerializer, 
@@ -22,6 +24,15 @@ class DoctorViewSet(viewsets.ModelViewSet):
     serializer_class = DoctorSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        try:
+            doctor = Doctor.objects.get(user=request.user)
+            serializer = self.get_serializer(doctor)
+            return Response(serializer.data)
+        except Doctor.DoesNotExist:
+            return Response({"detail": "Doctor profile not found."}, status=404)
+
 class PatientViewSet(viewsets.ModelViewSet):
     """
     ViewSet for viewing and editing patient profiles.
@@ -29,6 +40,15 @@ class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        try:
+            patient = Patient.objects.get(user=request.user)
+            serializer = self.get_serializer(patient)
+            return Response(serializer.data)
+        except Patient.DoesNotExist:
+            return Response({"detail": "Patient profile not found."}, status=404)
 
 class SlotViewSet(viewsets.ModelViewSet):
     """
