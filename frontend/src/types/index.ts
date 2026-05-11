@@ -13,7 +13,8 @@ export interface User {
 
 export interface Doctor {
   id: number;
-  user: User;
+  user: number;
+  user_details?: User;
   specialization: string;
   office_number?: string;
   bio?: string;
@@ -21,15 +22,18 @@ export interface Doctor {
 
 export interface Patient {
   id: number;
-  user: User;
+  user: number;
+  user_details?: User;
   insurance_number: string;
   medical_policy: string;
   address?: string;
 }
 
+
 export interface Slot {
   id: number;
   doctor: number;
+  doctor_details?: Doctor;
   start_time: string;
   end_time: string;
   is_available: boolean;
@@ -38,7 +42,9 @@ export interface Slot {
 export interface Appointment {
   id: number;
   patient: number;
+  patient_details?: Patient;
   slot: number;
+  slot_details?: Slot;
   status: 'scheduled' | 'completed' | 'cancelled';
   complaint?: string;
   diagnosis_mkb10?: string;
