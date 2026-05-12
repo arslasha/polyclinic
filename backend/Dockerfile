@@ -1,27 +1,21 @@
 FROM python:3.11-slim
 
-# Set environment variables
+WORKDIR /app
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Set work directory
-WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+RUN apt-get update && apt-get install -y \
     libpq-dev \
-    && apt-get clean \
+    gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install gunicorn
 
-# Copy project
 COPY . .
 
-# Run the application
-# We use a shell script or direct command. For dev, runserver is fine.
+EXPOSE 8000
+
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

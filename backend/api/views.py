@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import User, Doctor, Patient, Slot, Appointment, MedicalRecord
+from .models import User, Doctor, Patient, Slot, Appointment, MedicalRecord, UserRole
 from .serializers import (
     UserSerializer, DoctorSerializer, PatientSerializer, 
     SlotSerializer, AppointmentSerializer, MedicalRecordSerializer
@@ -66,6 +66,22 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return Appointment.objects.none()
+        
+        if user.is_staff or user.role == UserRole.ADMIN:
+            return Appointment.objects.all()
+        
+        if user.role == UserRole.DOCTOR:
+            return Appointment.objects.filter(slot__doctor__user=user)
+        
+        if user.role == UserRole.PATIENT:
+            return Appointment.objects.filter(patient__user=user)
+            
+        return Appointment.objects.none()
+
     def perform_create(self, serializer):
         """
         Create appointment and mark the slot as unavailable.
@@ -83,3 +99,19 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
     queryset = MedicalRecord.objects.all()
     serializer_class = MedicalRecordSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return MedicalRecord.objects.none()
+
+        if user.is_staff or user.role == UserRole.ADMIN:
+            return MedicalRecord.objects.all()
+
+        if user.role == UserRole.DOCTOR:
+            return MedicalRecord.objects.filter(doctor__user=user)
+
+        if user.role == UserRole.PATIENT:
+            return MedicalRecord.objects.filter(patient__user=user)
+
+        return MedicalRecord.objects.none()
