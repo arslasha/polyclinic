@@ -34,6 +34,16 @@ class PatientSerializer(serializers.ModelSerializer):
         model = Patient
         fields = ('id', 'user', 'user_details', 'insurance_number', 'medical_policy', 'address')
 
+    def validate_insurance_number(self, value):
+        if value and not (value.isdigit() and len(value) == 11):
+            raise serializers.ValidationError("СНИЛС должен состоять из 11 цифр.")
+        return value
+
+    def validate_medical_policy(self, value):
+        if value and not (value.isdigit() and len(value) == 16):
+            raise serializers.ValidationError("Полис должен состоять из 16 цифр.")
+        return value
+
 class SlotSerializer(serializers.ModelSerializer):
     """
     Serializer for doctor availability slots.

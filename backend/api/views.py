@@ -58,6 +58,19 @@ class SlotViewSet(viewsets.ModelViewSet):
     serializer_class = SlotSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        queryset = Slot.objects.all()
+        doctor_id = self.request.query_params.get('doctor_id')
+        date = self.request.query_params.get('date')
+
+        if doctor_id:
+            queryset = queryset.filter(doctor_id=doctor_id)
+        
+        if date:
+            queryset = queryset.filter(start_time__date=date)
+            
+        return queryset
+
 class AppointmentViewSet(viewsets.ModelViewSet):
     """
     ViewSet for viewing and editing appointments.
