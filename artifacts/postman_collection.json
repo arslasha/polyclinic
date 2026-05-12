@@ -1,0 +1,277 @@
+{
+	"info": {
+		"_postman_id": "8b8c2e1d-4f5a-4b9e-9d2c-8a1b2c3d4e5f",
+		"name": "Поликлиника API",
+		"description": "Коллекция запросов для тестирования системы управления поликлиникой.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login (Get Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.collectionVariables.set(\"accessToken\", jsonData.access);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"patient_arslan\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/token/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"token",
+								""
+							]
+						},
+						"description": "Получение JWT токена по логину и паролю."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"your_refresh_token_here\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/token/refresh/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"token",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Doctors",
+			"item": [
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/doctors/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"doctors",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Doctor Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/doctors/me/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"doctors",
+								"me",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Get My Patient Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/patients/me/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"patients",
+								"me",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Slots",
+			"item": [
+				{
+					"name": "Get Available Slots",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/slots/?is_available=true",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"slots",
+								""
+							],
+							"query": [
+								{
+									"key": "is_available",
+									"value": "true"
+								},
+								{
+									"key": "doctor",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "Create Appointment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient\": 1,\n    \"slot\": 5,\n    \"complaint\": \"Головная боль, общая слабость.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/appointments/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Appointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/appointments/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"appointments",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
