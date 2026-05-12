@@ -5,14 +5,29 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for the Custom User model.
     """
+    patient_profile = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
             'id', 'username', 'email', 'first_name', 
             'last_name', 'middle_name', 'role', 
-            'phone', 'birth_date', 'gender', 'created_at'
+            'phone', 'birth_date', 'gender', 'created_at',
+            'patient_profile'
         )
         read_only_fields = ('id', 'created_at')
+
+    def get_patient_profile(self, obj):
+        if hasattr(obj, 'patient_profile'):
+            p = obj.patient_profile
+            return {
+                "id": p.id,
+                "insurance_number": p.insurance_number,
+                "medical_policy": p.medical_policy,
+                "address": p.address,
+                "appointments": [a.id for a in p.appointments.all()]
+            }
+        return None
 
 class DoctorSerializer(serializers.ModelSerializer):
     """
@@ -29,10 +44,11 @@ class PatientSerializer(serializers.ModelSerializer):
     Serializer for the Patient profile.
     """
     user_details = UserSerializer(source='user', read_only=True)
+    appointments = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     
     class Meta:
         model = Patient
-        fields = ('id', 'user', 'user_details', 'insurance_number', 'medical_policy', 'address')
+        fields = ('id', 'user', 'user_details', 'insurance_number', 'medical_policy', 'address', 'appointments')
 
     def validate_insurance_number(self, value):
         if value and not (value.isdigit() and len(value) == 11):
